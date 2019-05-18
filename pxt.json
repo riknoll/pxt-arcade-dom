@@ -7,11 +7,15 @@
     },
     "files": [
         "README.md",
-        "main.ts"
+        "main.ts",
+        "component.ts",
+        "componentFunctions.ts",
+        "elements.ts",
+        "styleFunctions.ts"
     ],
     "testFiles": [
         "test.ts"
     ],
     "public": false,
-    "additionalFilePaths": []
+    "preferredEditor": "tsprj"
 }

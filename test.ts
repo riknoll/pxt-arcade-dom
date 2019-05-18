@@ -1,1 +1,7 @@
-// tests go here; this will not be compiled when this package is used as a library
+namespace DOM {
+    export function test() {
+        const el = box(box())
+    }
+} 
+
+DOM.test();
