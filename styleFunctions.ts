@@ -47,4 +47,11 @@ namespace DOM {
         return new Style(StyleName.color, val);
     }
 
+    export function padding(val: number): Style {
+        return new Style(StyleName.padding, val);
+    }
+
+    export function border(val: number): Style {
+        return new Style(StyleName.border, val);
+    }
 } 

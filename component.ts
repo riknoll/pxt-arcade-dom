@@ -1,31 +1,4 @@
 namespace DOM {
-    export const DEFAULT = -1;
-    export const INHERIT = -2;
-
-    export enum StyleName {
-        width,
-        height,
-        paddingLeft,
-        paddingTop,
-        paddingRight,
-        paddingBottom,
-        borderColor,
-        borderLeft,
-        borderTop,
-        borderRight,
-        borderBottom,
-        color,
-    }
-
-    export class Style {
-        readonly name: StyleName;
-        value: number;
-        constructor(name: StyleName, value = DEFAULT) {
-            this.name = name;
-            this.value = value;
-        }
-    }
-
     export class BoundingBox {
         left: number;
         top: number;
@@ -76,12 +49,44 @@ namespace DOM {
     export class ContentBox {
         padding: BoxValues;
         border: BoxValues;
+        align: ContentAlign;
         borderColor: number;
 
         constructor() {
             this.padding = new BoxValues();
             this.border = new BoxValues();
             this.borderColor = 1;
+            this.align = ContentAlign.Center;
+        }
+
+        getElementBounds(left: number, top: number, outerWidth: number, outerHeight: number) {
+            const r = new BoundingBox();
+            r.left = left + this.border.left;
+            r.top = top + this.border.top;
+            r.width = outerWidth - this.border.left - this.border.right;
+            r.height = outerHeight - this.border.top - this.border.bottom;
+            return r;
+        }
+
+        getContentBounds(element: BoundingBox, contentWidth: number, contentHeight: number) {
+            const r = new BoundingBox();
+            r.top = element.top + this.padding.top;
+            r.width = contentWidth;
+            r.height = contentHeight;
+
+            switch (this.align) {
+                case ContentAlign.Left:
+                    r.left = element.left + this.padding.left;
+                    break;
+                case ContentAlign.Center:
+                    r.left = element.left + (element.width >> 1) - (contentWidth >> 1);
+                    break;
+                case ContentAlign.Right:
+                    r.left = (element.left + element.width - this.padding.right - contentWidth);
+                    break;
+            }
+
+            return r;
         }
     }
 
@@ -89,6 +94,9 @@ namespace DOM {
         parent: Element;
         children: Element[];
         contentBox: ContentBox;
+
+        className: string;
+        sheet: StyleSheet;
 
         verticalFlow: boolean;
 
@@ -103,10 +111,17 @@ namespace DOM {
             this.verticalFlow = true;
             this.width = DEFAULT;
             this.height = DEFAULT;
+            this.contentBox = new ContentBox();
         }
 
         appendChild(child: Element) {
             if (!this.children) this.children = [];
+
+            if (child.parent) {
+                child.parent.removeChild(child);
+            }
+
+            child.parent = this;
             this.children.push(child);
         }
 
@@ -117,7 +132,7 @@ namespace DOM {
 
         draw() {
             if (!this._renderedBounds) {
-                this.render(0, 0);
+                this.render();
             }
 
             this.drawSelf(this._renderedBounds);
@@ -129,14 +144,15 @@ namespace DOM {
             }
         }
 
-        render(left: number, top: number) {
+        render(bounds?: BoundingBox) {
             if (this._renderedBounds) return;
 
-            this._renderedBounds = new BoundingBox();
-            this._renderedBounds.left = left;
-            this._renderedBounds.top = top;
-            this._renderedBounds.width = calculateWidth(this);
-            this._renderedBounds.height = calculateHeight(this);
+            if (bounds) {
+                this._renderedBounds = this.contentBox.getElementBounds(bounds.left, bounds.top, bounds.width, bounds.height)
+            }
+            else {
+                this._renderedBounds = this.contentBox.getElementBounds(0, 0, calculateWidth(this), calculateHeight(this));
+            }
 
             if (this.children) {
                 if (this.verticalFlow) this.renderVerticalFlow();
@@ -159,32 +175,28 @@ namespace DOM {
         }
 
         protected renderVerticalFlow() {
-            let x = this._renderedBounds.left;
-            let y = this._renderedBounds.top;
+            let y = this._renderedBounds.top + this.contentBox.padding.top + this.contentBox.border.top;
 
-            if (this.contentBox) {
-                x += this.contentBox.padding.left + this.contentBox.border.left;
-                y += this.contentBox.padding.top + this.contentBox.border.top;
-            }
+            let current: BoundingBox;
 
             for (const child of this.children) {
-                child.render(x, y);
-                y += child._renderedBounds.height;
+                current = this.contentBox.getContentBounds(this._renderedBounds, calculateWidth(child), calculateHeight(child));
+                current.top = y;
+                child.render(current);
+                y += current.height;
             }
         }
 
         protected renderHorizontalFlow() {
-            let x = this._renderedBounds.left;
-            let y = this._renderedBounds.top;
-
-            if (this.contentBox) {
-                x += this.contentBox.padding.left + this.contentBox.border.left;
-                y += this.contentBox.padding.top + this.contentBox.border.top;
-            }
+            let x = this._renderedBounds.left + this.contentBox.padding.left + this.contentBox.border.left;
+            let current: BoundingBox;
 
             for (const child of this.children) {
-                child.render(x, y);
-                x += child._renderedBounds.width;
+                current = this.contentBox.getContentBounds(this._renderedBounds, calculateWidth(child), calculateHeight(child));
+                current.left = x;
+                child.render(current);
+
+                x += current.width;
             }
         }
 
@@ -192,23 +204,31 @@ namespace DOM {
             // subclass
         }
 
-        private initContentBox() {
-            if (!this.contentBox) this.contentBox = new ContentBox();
-        }
-
         protected applyStyle(style: Style) {
             switch (style.name) {
                 case StyleName.width: this.width = style.value; return;
                 case StyleName.height: this.height = style.value; return;
-                case StyleName.borderColor: this.initContentBox(); this.contentBox.borderColor = style.value; return;
-                case StyleName.borderLeft: this.initContentBox(); this.contentBox.border.left = style.value; return;
-                case StyleName.borderRight: this.initContentBox(); this.contentBox.border.right = style.value; return;
-                case StyleName.borderTop: this.initContentBox(); this.contentBox.border.top = style.value; return;
-                case StyleName.borderBottom: this.initContentBox(); this.contentBox.border.bottom = style.value; return;
-                case StyleName.paddingLeft: this.initContentBox(); this.contentBox.padding.left = style.value; return;
-                case StyleName.paddingRight: this.initContentBox(); this.contentBox.padding.right = style.value; return;
-                case StyleName.paddingTop: this.initContentBox(); this.contentBox.padding.top = style.value; return;
-                case StyleName.paddingBottom: this.initContentBox(); this.contentBox.padding.bottom = style.value; return;
+                case StyleName.borderColor: this.contentBox.borderColor = style.value; return;
+                case StyleName.borderLeft: this.contentBox.border.left = style.value; return;
+                case StyleName.borderRight: this.contentBox.border.right = style.value; return;
+                case StyleName.borderTop: this.contentBox.border.top = style.value; return;
+                case StyleName.borderBottom: this.contentBox.border.bottom = style.value; return;
+                case StyleName.paddingLeft: this.contentBox.padding.left = style.value; return;
+                case StyleName.paddingRight: this.contentBox.padding.right = style.value; return;
+                case StyleName.paddingTop: this.contentBox.padding.top = style.value; return;
+                case StyleName.paddingBottom: this.contentBox.padding.bottom = style.value; return;
+                case StyleName.padding:
+                    this.contentBox.padding.left = style.value;
+                    this.contentBox.padding.right = style.value;
+                    this.contentBox.padding.top = style.value;
+                    this.contentBox.padding.bottom = style.value;
+                    break;
+                case StyleName.border:
+                    this.contentBox.border.left = style.value;
+                    this.contentBox.border.right = style.value;
+                    this.contentBox.border.top = style.value;
+                    this.contentBox.border.bottom = style.value;
+                    break;
             }
         }
     }
@@ -252,15 +272,12 @@ namespace DOM {
                 }
                 childWidth = totalWidth;
             }
-
         }
 
-        if (element.contentBox) {
-            childWidth += element.contentBox.padding.left +
-                element.contentBox.padding.right +
-                element.contentBox.border.left +
-                element.contentBox.border.right;
-        }
+        childWidth += element.contentBox.padding.left +
+            element.contentBox.padding.right +
+            element.contentBox.border.left +
+            element.contentBox.border.right;
 
         if (element.width === DEFAULT) {
             element._cachedWidth = childWidth;
@@ -294,12 +311,10 @@ namespace DOM {
             }
         }
 
-        if (element.contentBox) {
-            childHeight += element.contentBox.padding.top +
-                element.contentBox.padding.bottom +
-                element.contentBox.border.top +
-                element.contentBox.border.bottom;
-        }
+        childHeight += element.contentBox.padding.top +
+            element.contentBox.padding.bottom +
+            element.contentBox.border.top +
+            element.contentBox.border.bottom;
 
         if (element.height === DEFAULT) {
             element._cachedHeight = childHeight;
@@ -310,21 +325,19 @@ namespace DOM {
 
     function contentWidth(element: Element) {
         if (!element) return screen.width;
-        else if (element.contentBox) return calculateWidth(element) -
+        else return calculateWidth(element) -
             element.contentBox.padding.left -
             element.contentBox.padding.right -
             element.contentBox.border.left -
             element.contentBox.border.right;
-        else return calculateWidth(element);
     }
 
     function contentHeight(element: Element) {
         if (!element) return screen.height;
-        else if (element.contentBox) return calculateHeight(element) -
+        else return calculateHeight(element) -
             element.contentBox.padding.top -
             element.contentBox.padding.bottom -
             element.contentBox.border.top -
             element.contentBox.border.bottom;
-        else return calculateHeight(element);
     }
 }

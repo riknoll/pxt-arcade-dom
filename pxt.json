@@ -11,7 +11,8 @@
         "component.ts",
         "componentFunctions.ts",
         "elements.ts",
-        "styleFunctions.ts"
+        "styleFunctions.ts",
+        "style.ts"
     ],
     "testFiles": [
         "test.ts"
