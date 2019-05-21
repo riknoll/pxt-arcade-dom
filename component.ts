@@ -213,6 +213,7 @@ namespace DOM {
                 case StyleName.borderRight: this.contentBox.border.right = style.value; return;
                 case StyleName.borderTop: this.contentBox.border.top = style.value; return;
                 case StyleName.borderBottom: this.contentBox.border.bottom = style.value; return;
+                case StyleName.contentAlign: this.contentBox.align = style.value; break;
                 case StyleName.paddingLeft: this.contentBox.padding.left = style.value; return;
                 case StyleName.paddingRight: this.contentBox.padding.right = style.value; return;
                 case StyleName.paddingTop: this.contentBox.padding.top = style.value; return;

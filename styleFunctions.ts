@@ -54,4 +54,20 @@ namespace DOM {
     export function border(val: number): Style {
         return new Style(StyleName.border, val);
     }
+
+    export function alignLeft(): Style {
+        return new Style(StyleName.contentAlign, ContentAlign.Left);
+    }
+
+    export function alignCenter(): Style {
+        return new Style(StyleName.contentAlign, ContentAlign.Center);
+    }
+
+    export function alignRight(): Style {
+        return new Style(StyleName.contentAlign, ContentAlign.Right);
+    }
+
+    export function smallFont(): Style {
+        return new Style(StyleName.font, Font.Small);
+    }
 } 

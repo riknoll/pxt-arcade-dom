@@ -17,13 +17,19 @@ namespace DOM {
         borderBottom,
         border,
         color,
-        contentAlign
+        contentAlign,
+        font
     }
 
     export enum ContentAlign {
         Left,
         Center,
         Right
+    }
+
+    export enum Font {
+        Normal,
+        Small
     }
 
     export class Style {
