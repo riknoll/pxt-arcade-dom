@@ -1,4 +1,4 @@
-namespace DOM {
+namespace ui {
     export class ShapeElement extends Element {
         color: number;
 

@@ -1,5 +1,5 @@
 {
-    "name": "pxt-arcade-dom",
+    "name": "pxt-arcade-ui",
     "version": "0.0.1",
     "description": "",
     "dependencies": {
@@ -8,8 +8,8 @@
     "files": [
         "README.md",
         "main.ts",
-        "component.ts",
-        "componentFunctions.ts",
+        "element.ts",
+        "elementFunctions.ts",
         "elements.ts",
         "styleFunctions.ts",
         "style.ts"

@@ -1,13 +1,13 @@
-namespace DOM {
+namespace ui {
     export function test() {
         // const el = verticalFlow([
-        //     box(text("Party"), [borderBottom(1), padding(1), width(INHERIT), color(3)]),
-        //     box(text("Save"), [borderBottom(1), padding(1), width(INHERIT), color(3)]),
-        //     box(text("Close"), [borderBottom(1), padding(1), width(INHERIT), color(3)]),
+        //     box(text("Party"), [borderBottom(1), padding(1), width(FILL), color(3)]),
+        //     box(text("Save"), [borderBottom(1), padding(1), width(FILL), color(3)]),
+        //     box(text("Close"), [borderBottom(1), padding(1), width(FILL), color(3)]),
         // ])
 
         const el = verticalFlow([
-            box(nameView(), [width(INHERIT), alignRight(), borderRight(2)]),
+            box(nameView(), [width(FILL), alignRight(), borderRight(2)]),
             horizontalFlow([
                 box(statsView(), [border(2)]),
                 box(detailView(), [borderBottom(2), borderTop(2), borderRight(2)])
@@ -20,8 +20,8 @@ namespace DOM {
     }
 
     function statsView() {
-        const nameStyle = [alignLeft(), width(INHERIT)];
-        const statStyle = [alignRight(), width(INHERIT)];
+        const nameStyle = [alignLeft(), width(FILL)];
+        const statStyle = [alignRight(), width(FILL)];
         const el = box(
             verticalFlow([
                 box(text("ATTACK"), nameStyle),
@@ -32,15 +32,15 @@ namespace DOM {
                 box(text("152", [smallFont()]), statStyle),
                 box(text("SPECIAL"), nameStyle),
                 box(text("132", [smallFont()]), statStyle)
-            ], [width(INHERIT)]),
+            ], [width(FILL)]),
             [color(1), width(60), padding(2)]);
 
         return el;
     }
 
     function detailView() {
-        const nameStyle = [alignLeft(), width(INHERIT)];
-        const detailStyle = [alignLeft(), width(INHERIT), paddingLeft(5)];
+        const nameStyle = [alignLeft(), width(FILL)];
+        const detailStyle = [alignLeft(), width(FILL), paddingLeft(5)];
 
         const el = box(
             verticalFlow([
@@ -52,7 +52,7 @@ namespace DOM {
                 box(text("44196", [smallFont()]), detailStyle),
                 box(text("OT/"), nameStyle),
                 box(text("Richard", [smallFont()]), detailStyle),
-            ], [width(INHERIT)]),
+            ], [width(FILL)]),
             [color(1), width(60), padding(2)]);
 
         return el;
@@ -61,10 +61,10 @@ namespace DOM {
     function nameView() {
         const el = box(
             verticalFlow([
-                box(text("SPARKY"), [width(INHERIT), alignLeft()]),
-                box(hpView(), [alignRight(), paddingTop(1), paddingBottom(1), width(INHERIT)]),
-                box(text("STATUS/OK"), [width(INHERIT), alignLeft()]),
-            ], [width(INHERIT)]),
+                box(text("SPARKY"), [width(FILL), alignLeft()]),
+                box(hpView(), [alignRight(), paddingTop(1), paddingBottom(1), width(FILL)]),
+                box(text("STATUS/OK"), [width(FILL), alignLeft()]),
+            ], [width(FILL)]),
             [color(1), padding(2), width(70)]);
 
         return el;
@@ -76,9 +76,9 @@ namespace DOM {
             horizontalFlow([
                 box(text("HP:", [smallFont()]), [paddingTop(3)]),
                 verticalFlow([
-                    box(text("L48", [smallFont()]), [width(INHERIT), alignCenter()]),
-                    box(undefined, [width(INHERIT), height(4), color(3), border(1)]),
-                    box(text("95/138", [smallFont()]), [width(INHERIT), alignRight()])
+                    box(text("L48", [smallFont()]), [width(FILL), alignCenter()]),
+                    box(undefined, [width(FILL), height(4), color(3), border(1)]),
+                    box(text("95/138", [smallFont()]), [width(FILL), alignRight()])
                 ], [width(30)])
             ])
 
@@ -86,4 +86,4 @@ namespace DOM {
     }
 }
 
-DOM.test();
+ui.test();

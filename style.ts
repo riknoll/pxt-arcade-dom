@@ -1,6 +1,6 @@
-namespace DOM {
-    export const DEFAULT = -1;
-    export const INHERIT = -2;
+namespace ui {
+    export const WRAP = -1;
+    export const FILL = -2;
 
     export enum StyleName {
         width,
@@ -35,7 +35,7 @@ namespace DOM {
     export class Style {
         readonly name: StyleName;
         value: number;
-        constructor(name: StyleName, value = DEFAULT) {
+        constructor(name: StyleName, value = WRAP) {
             this.name = name;
             this.value = value;
         }

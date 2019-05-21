@@ -1,4 +1,4 @@
-namespace DOM {
+namespace ui {
     export function width(val: number): Style {
         return new Style(StyleName.width, val);
     }
@@ -70,4 +70,4 @@ namespace DOM {
     export function smallFont(): Style {
         return new Style(StyleName.font, Font.Small);
     }
-} 
+}

@@ -1,4 +1,4 @@
-namespace DOM {
+namespace ui {
     export class BoundingBox {
         left: number;
         top: number;
@@ -109,8 +109,8 @@ namespace DOM {
 
         constructor() {
             this.verticalFlow = true;
-            this.width = DEFAULT;
-            this.height = DEFAULT;
+            this.width = WRAP;
+            this.height = WRAP;
             this.contentBox = new ContentBox();
         }
 
@@ -237,39 +237,39 @@ namespace DOM {
     function calculateWidth(element: Element): number {
         if (!element) return screen.width;
         else if (element._cachedWidth != undefined) return element._cachedWidth;
-        else if (element.width === DEFAULT) return getDefaultWidth(element);
-        else if (element.width === INHERIT) return element._cachedWidth = contentWidth(element.parent);
+        else if (element.width === WRAP) return getWRAPWidth(element);
+        else if (element.width === FILL) return element._cachedWidth = contentWidth(element.parent);
         else return element._cachedWidth = element.width;
     }
 
     function calculateHeight(element: Element): number {
         if (!element) return screen.height;
         else if (element._cachedHeight != undefined) return element._cachedHeight;
-        else if (element.height === DEFAULT) return getDefaultHeight(element);
-        else if (element.height === INHERIT) return element._cachedHeight = contentHeight(element.parent);
+        else if (element.height === WRAP) return getWRAPHeight(element);
+        else if (element.height === FILL) return element._cachedHeight = contentHeight(element.parent);
         else return element._cachedHeight = element.height;
     }
 
-    function getDefaultWidth(element: Element) {
+    function getWRAPWidth(element: Element) {
         if (element._cachedWidth != undefined) return element._cachedWidth;
 
         let childWidth = 0;
 
-        if (element.width !== DEFAULT && element.width !== INHERIT) {
+        if (element.width !== WRAP && element.width !== FILL) {
             return element._cachedWidth = element.width;
         }
         else if (element.children) {
             if (element.verticalFlow) {
                 let maxWidth = 0;
                 for (const child of element.children) {
-                    maxWidth = Math.max(getDefaultWidth(child), maxWidth)
+                    maxWidth = Math.max(getWRAPWidth(child), maxWidth)
                 }
                 childWidth = maxWidth;
             }
             else {
                 let totalWidth = 0;
                 for (const child of element.children) {
-                    totalWidth += getDefaultWidth(child);
+                    totalWidth += getWRAPWidth(child);
                 }
                 childWidth = totalWidth;
             }
@@ -280,33 +280,33 @@ namespace DOM {
             element.contentBox.border.left +
             element.contentBox.border.right;
 
-        if (element.width === DEFAULT) {
+        if (element.width === WRAP) {
             element._cachedWidth = childWidth;
         }
 
         return childWidth;
     }
 
-    function getDefaultHeight(element: Element) {
+    function getWRAPHeight(element: Element) {
         if (element._cachedHeight != undefined) return element._cachedHeight;
 
         let childHeight = 0;
 
-        if (element.height !== DEFAULT && element.height !== INHERIT) {
+        if (element.height !== WRAP && element.height !== FILL) {
             return element._cachedHeight = element.height;
         }
         else if (element.children) {
             if (element.verticalFlow) {
                 let totalHeight = 0;
                 for (const child of element.children) {
-                    totalHeight += getDefaultHeight(child);
+                    totalHeight += getWRAPHeight(child);
                 }
                 childHeight = totalHeight;
             }
             else {
                 let maxHeight = 0;
                 for (const child of element.children) {
-                    maxHeight = Math.max(getDefaultHeight(child), maxHeight)
+                    maxHeight = Math.max(getWRAPHeight(child), maxHeight)
                 }
                 childHeight = maxHeight;
             }
@@ -317,7 +317,7 @@ namespace DOM {
             element.contentBox.border.top +
             element.contentBox.border.bottom;
 
-        if (element.height === DEFAULT) {
+        if (element.height === WRAP) {
             element._cachedHeight = childHeight;
         }
 
