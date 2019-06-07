@@ -55,7 +55,7 @@ namespace ui {
         constructor() {
             this.padding = new BoxValues();
             this.border = new BoxValues();
-            this.borderColor = 1;
+            this.borderColor = 0;
             this.align = ContentAlign.Center;
         }
 
@@ -96,13 +96,13 @@ namespace ui {
         contentBox: ContentBox;
 
         className: string;
-        sheet: StyleSheet;
 
         verticalFlow: boolean;
 
         width: number;
         height: number;
 
+        protected sheet: StyleSheet;
         _cachedWidth: number;
         _cachedHeight: number;
         _renderedBounds: BoundingBox;
@@ -129,6 +129,12 @@ namespace ui {
             if (this.children) this.children.removeElement(child);
         }
 
+        defineStyleClass(className: string, styles?: Style[]) {
+            if (!this.sheet) this.sheet = new StyleSheet();
+            const rule = new StyleRule(className, styles);
+            this.sheet.addRule(rule);
+            return rule;
+        }
 
         draw() {
             if (!this._renderedBounds) {
@@ -136,6 +142,7 @@ namespace ui {
             }
 
             this.drawSelf(this._renderedBounds);
+            this.drawBorder();
 
             if (this.children) {
                 for (const child of this.children) {
@@ -146,6 +153,7 @@ namespace ui {
 
         render(bounds?: BoundingBox) {
             if (this._renderedBounds) return;
+            this.updateStyles();
 
             if (bounds) {
                 this._renderedBounds = this.contentBox.getElementBounds(bounds.left, bounds.top, bounds.width, bounds.height)
@@ -171,6 +179,28 @@ namespace ui {
         applyStyles(styles: Style[]) {
             for (const style of styles) {
                 this.applyStyle(style);
+            }
+        }
+
+        updateStyles() {
+            let classStyles: Style[];
+
+            if (this.className) {
+                let current: Element = this;
+                while (current) {
+                    classStyles = current.sheet.getStylesForClass(this.className);
+                    if (classStyles) {
+                        break;
+                    }
+
+                    current = current.parent;
+                }
+            }
+
+            if (classStyles && classStyles.length) {
+                for (const style of classStyles) {
+                    this.applyStyle(style);
+                }
             }
         }
 
@@ -232,6 +262,50 @@ namespace ui {
                     break;
             }
         }
+
+        protected drawBorder() {
+            if (this.contentBox.borderColor === 0) return;
+
+            if (this.contentBox.border.left) {
+                screen.fillRect(
+                    this._renderedBounds.left - this.contentBox.border.left,
+                    this._renderedBounds.top - this.contentBox.border.top,
+                    this.contentBox.border.left,
+                    this._renderedBounds.height + this.contentBox.border.top + this.contentBox.border.bottom,
+                    this.contentBox.borderColor
+                );
+            }
+
+            if (this.contentBox.border.right) {
+                screen.fillRect(
+                    this._renderedBounds.left + this._renderedBounds.width,
+                    this._renderedBounds.top - this.contentBox.border.top,
+                    this.contentBox.border.right,
+                    this._renderedBounds.height + this.contentBox.border.top + this.contentBox.border.bottom,
+                    this.contentBox.borderColor
+                );
+            }
+
+            if (this.contentBox.border.top) {
+                screen.fillRect(
+                    this._renderedBounds.left - this.contentBox.border.left,
+                    this._renderedBounds.top - this.contentBox.border.top,
+                    this._renderedBounds.width + this.contentBox.border.left + this.contentBox.border.right,
+                    this.contentBox.border.top,
+                    this.contentBox.borderColor
+                );
+            }
+
+            if (this.contentBox.border.bottom) {
+                screen.fillRect(
+                    this._renderedBounds.left - this.contentBox.border.left,
+                    this._renderedBounds.top + this._renderedBounds.height,
+                    this._renderedBounds.width + this.contentBox.border.left + this.contentBox.border.right,
+                    this.contentBox.border.bottom,
+                    this.contentBox.borderColor
+                );
+            }
+        }
     }
 
     function calculateWidth(element: Element): number {
@@ -252,6 +326,8 @@ namespace ui {
 
     function getWRAPWidth(element: Element) {
         if (element._cachedWidth != undefined) return element._cachedWidth;
+
+        element.updateStyles();
 
         let childWidth = 0;
 
@@ -289,6 +365,7 @@ namespace ui {
 
     function getWRAPHeight(element: Element) {
         if (element._cachedHeight != undefined) return element._cachedHeight;
+        element.updateStyles();
 
         let childHeight = 0;
 
@@ -326,19 +403,25 @@ namespace ui {
 
     function contentWidth(element: Element) {
         if (!element) return screen.width;
-        else return calculateWidth(element) -
-            element.contentBox.padding.left -
-            element.contentBox.padding.right -
-            element.contentBox.border.left -
-            element.contentBox.border.right;
+        else {
+            element.updateStyles();
+            return calculateWidth(element) -
+                element.contentBox.padding.left -
+                element.contentBox.padding.right -
+                element.contentBox.border.left -
+                element.contentBox.border.right;
+        }
     }
 
     function contentHeight(element: Element) {
         if (!element) return screen.height;
-        else return calculateHeight(element) -
-            element.contentBox.padding.top -
-            element.contentBox.padding.bottom -
-            element.contentBox.border.top -
-            element.contentBox.border.bottom;
+        else {
+            element.updateStyles();
+            return calculateHeight(element) -
+                element.contentBox.padding.top -
+                element.contentBox.padding.bottom -
+                element.contentBox.border.top -
+                element.contentBox.border.bottom;
+        }
     }
 }

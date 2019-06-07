@@ -45,6 +45,20 @@ namespace ui {
 
         setText(text: string) {
             this.text = text;
+            this.updateBounds();
+        }
+
+        applyStyle(style: Style) {
+            if (style.name === StyleName.font) {
+                this.font = style.value;
+                this.updateBounds();
+            }
+            else {
+                super.applyStyle(style);
+            }
+        }
+
+        protected updateBounds() {
             const f = this.renderFont();
             this.height = f.charHeight;
             if (this.text) {
@@ -52,17 +66,6 @@ namespace ui {
             }
             else {
                 this.width = 0;
-            }
-        }
-
-        applyStyle(style: Style) {
-            if (style.name === StyleName.font) {
-                this.font = style.value;
-                // Update dimensions
-                this.setText(this.text);
-            }
-            else {
-                super.applyStyle(style);
             }
         }
 
@@ -75,6 +78,33 @@ namespace ui {
                 return image.font5
             }
             return image.font8;
+        }
+    }
+
+    export class ImageElement extends Element {
+        protected src: Image;
+
+        constructor(src: Image) {
+            super();
+
+            this.src = src;
+        }
+
+        protected drawSelf(bounds: BoundingBox) {
+            screen.drawTransparentImage(this.src, bounds.left, bounds.top);
+        }
+    }
+
+    export class DynamicElement extends Element {
+        protected drawFunction: (bounds: BoundingBox) => void;
+
+        constructor(drawFunction: (bounds: BoundingBox) => void) {
+            super();
+            this.drawFunction = drawFunction;
+        }
+
+        protected drawSelf(bounds: BoundingBox) {
+            this.drawFunction(bounds);
         }
     }
 }

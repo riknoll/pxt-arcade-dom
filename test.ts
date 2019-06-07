@@ -1,15 +1,15 @@
 namespace ui {
     export function test() {
-
         const el = verticalFlow([
             box(nameView(), [width(FILL), alignRight(), borderRight(2)]),
             horizontalFlow([
                 box(statsView(), [border(2)]),
-                box(detailView(), [borderBottom(2), borderTop(2), borderRight(2)])
+                box(detailView(), [border(4), borderColor(3)])
             ])
         ]);
 
         game.onShade(function () {
+            el.markDirty();
             el.draw();
         });
     }
