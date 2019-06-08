@@ -95,17 +95,17 @@ namespace ui {
         children: Element[];
         contentBox: ContentBox;
 
-        className: string;
-
         verticalFlow: boolean;
 
         width: number;
         height: number;
 
-        protected sheet: StyleSheet;
         _cachedWidth: number;
         _cachedHeight: number;
         _renderedBounds: BoundingBox;
+
+        protected sheet: StyleSheet;
+        protected classes: string[];
 
         constructor() {
             this.verticalFlow = true;
@@ -153,7 +153,7 @@ namespace ui {
 
         render(bounds?: BoundingBox) {
             if (this._renderedBounds) return;
-            this.updateStyles();
+            this.applyClassStyles();
 
             if (bounds) {
                 this._renderedBounds = this.contentBox.getElementBounds(bounds.left, bounds.top, bounds.width, bounds.height)
@@ -178,28 +178,34 @@ namespace ui {
 
         applyStyles(styles: Style[]) {
             for (const style of styles) {
-                this.applyStyle(style);
+                if (style) this.applyStyle(style);
             }
         }
 
-        updateStyles() {
-            let classStyles: Style[];
+        protected applyClassStyles() {
+            if (this._renderedBounds) return;
+            if (this.classes) this.classes.forEach(c => this.applyStylesForClass(c));
+            if (this.children) this.children.forEach(c => c.applyClassStyles());
+        }
 
-            if (this.className) {
-                let current: Element = this;
-                while (current) {
-                    classStyles = current.sheet.getStylesForClass(this.className);
+        protected applyStylesForClass(className: string) {
+            let classStyles: Style[];
+            let current: Element = this;
+
+            while (current) {
+                if (current.sheet) {
+                    classStyles = current.sheet.getStylesForClass(className);
                     if (classStyles) {
                         break;
                     }
-
-                    current = current.parent;
                 }
+
+                current = current.parent;
             }
 
             if (classStyles && classStyles.length) {
                 for (const style of classStyles) {
-                    this.applyStyle(style);
+                    if (style) this.applyStyle(style);
                 }
             }
         }
@@ -259,6 +265,10 @@ namespace ui {
                     this.contentBox.border.right = style.value;
                     this.contentBox.border.top = style.value;
                     this.contentBox.border.bottom = style.value;
+                    break;
+                case StyleName.className:
+                    if (!this.classes) this.classes = [];
+                    this.classes.push(style.stringValue);
                     break;
             }
         }
@@ -327,8 +337,6 @@ namespace ui {
     function getWRAPWidth(element: Element) {
         if (element._cachedWidth != undefined) return element._cachedWidth;
 
-        element.updateStyles();
-
         let childWidth = 0;
 
         if (element.width !== WRAP && element.width !== FILL) {
@@ -365,7 +373,6 @@ namespace ui {
 
     function getWRAPHeight(element: Element) {
         if (element._cachedHeight != undefined) return element._cachedHeight;
-        element.updateStyles();
 
         let childHeight = 0;
 
@@ -404,7 +411,6 @@ namespace ui {
     function contentWidth(element: Element) {
         if (!element) return screen.width;
         else {
-            element.updateStyles();
             return calculateWidth(element) -
                 element.contentBox.padding.left -
                 element.contentBox.padding.right -
@@ -416,7 +422,6 @@ namespace ui {
     function contentHeight(element: Element) {
         if (!element) return screen.height;
         else {
-            element.updateStyles();
             return calculateHeight(element) -
                 element.contentBox.padding.top -
                 element.contentBox.padding.bottom -

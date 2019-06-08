@@ -18,7 +18,8 @@ namespace ui {
         border,
         color,
         contentAlign,
-        font
+        font,
+        className
     }
 
     export enum ContentAlign {
@@ -35,7 +36,9 @@ namespace ui {
     export class Style {
         readonly name: StyleName;
         value: number;
-        constructor(name: StyleName, value = WRAP) {
+        stringValue: string;
+
+        constructor(name: StyleName, value?: number) {
             this.name = name;
             this.value = value;
         }
@@ -45,7 +48,7 @@ namespace ui {
         readonly className: string;
         protected styles: Style[];
 
-        constructor(className: string, styles?: Style[]) {
+        constructor(className: string, styles: Style[]) {
             this.className = className;
             this.styles = styles || [];
         }

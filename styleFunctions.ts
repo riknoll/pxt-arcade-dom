@@ -70,4 +70,10 @@ namespace ui {
     export function smallFont(): Style {
         return new Style(StyleName.font, Font.Small);
     }
+
+    export function className(name: string): Style {
+        const res = new Style(StyleName.className);
+        res.stringValue = name;
+        return res;
+    }
 }
