@@ -1,5 +1,5 @@
 {
-    "name": "pxt-arcade-ui",
+    "name": "pxt-arcade-dom",
     "version": "0.0.4",
     "description": "",
     "dependencies": {
